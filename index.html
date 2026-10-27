@@ -119,7 +119,7 @@
 
     <div class="app-container">
 
-        <!-- 1. 시작 화면 (동화책 배경 + 253 가을운동회 타이틀) -->
+        <!-- 1. 시작 화면 -->
         <div id="setup-screen">
             <div class="title-flash" style="font-size:2.2rem; text-shadow: 3px 3px 0 #000, 5px 5px 0 #ff0077;">253 가을운동회</div>
             <div style="font-size:0.95rem; color:#ffea00; margin-bottom:15px; text-shadow: 1px 1px 2px #000;">참가할 팀을 선택해주세요!</div>
@@ -139,7 +139,7 @@
             </button>
         </div>
 
-        <!-- 2. 메인 화면 (전광판, 점수판, 5대 종목) -->
+        <!-- 2. 메인 화면 -->
         <div id="main-screen" class="arcade-box" style="display:none;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(0,0,0,0.3); padding:8px; border-radius:8px;">
                 <span style="font-size:0.9rem;"><b id="my-info-badge" style="color:#ffea00;">--</b> 님 환영합니다!</span>
@@ -210,9 +210,9 @@
                 </table>
             </div>
 
-            <!-- 관리자 패널 -->
+            <!-- 관리자 패널 (비밀번호 노출 문구 제거됨) -->
             <div class="admin-panel">
-                <div style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">🛠️ 관리자 전용 제어판 (비번: 253253)</div>
+                <div style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">🛠️ 관리자 전용 제어판</div>
                 <button class="admin-btn" onclick="resetTeamScore('청팀')">🔵 청팀 상금 초기화</button>
                 <button class="admin-btn" onclick="resetTeamScore('백팀')">⚪ 백팀 상금 초기화</button>
                 <button class="admin-btn danger" onclick="adminResetAll()">전체 데이터 초기화</button>
