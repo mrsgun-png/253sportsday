@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>253 가을운동회</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght=700&display=swap');
+        
+        * { box-sizing: border-box; touch-action: manipulation; }
+        body {
+            margin: 0; padding: 0; background: #0f1a2e; color: #fff;
+            font-family: 'Black Han Sans', sans-serif;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 10px;
+        }
+
+        .app-container { width: 100%; max-width: 440px; position: relative; }
+
+        .arcade-box {
+            background: #1a2c4e; border: 4px solid #ffaa00; border-radius: 16px; padding: 16px;
+            box-shadow: 0 0 25px rgba(255, 170, 0, 0.4); text-align: center; margin-bottom: 10px;
+        }
+        .title-flash {
+            font-size: 1.8rem; color: #ffea00;
+            text-shadow: 3px 3px 0 #ff0077, 5px 5px 0 #000;
+            margin: 5px 0 10px 0;
+        }
+
+        /* 팀 선택 화면 */
+        .team-select-container { display: flex; gap: 10px; margin: 15px 0; }
+        .team-btn {
+            flex: 1; padding: 20px; border-radius: 12px; border: none; font-family: 'Black Han Sans', sans-serif;
+            font-size: 1.2rem; cursor: pointer; color: #fff; box-shadow: 0 5px 0 rgba(0,0,0,0.3);
+        }
+        .team-btn.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .team-btn.white { background: linear-gradient(135deg, #e2e8f0, #94a3b8); color: #0f1a2e; }
+
+        .member-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 220px; overflow-y: auto; margin: 10px 0; padding-right: 4px;
+        }
+        .member-card {
+            background: rgba(255,255,255,0.05); border: 2px solid #555; border-radius: 10px;
+            padding: 10px; cursor: pointer; text-align: center; font-size: 1rem;
+        }
+        .member-card.selected { border-color: #ffaa00; background: rgba(255,170,0,0.2); color: #ffea00; }
+
+        /* 메인 스코어보드 & 전광판 */
+        .scoreboard-panel {
+            display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px;
+        }
+        .score-card {
+            flex: 1; padding: 10px; border-radius: 10px; text-align: center; border: 2px solid #fff;
+        }
+        .score-card.blue { background: rgba(59, 130, 246, 0.3); border-color: #3b82f6; }
+        .score-card.white { background: rgba(226, 232, 240, 0.3); border-color: #cbd5e1; }
+
+        .goal-board {
+            background: rgba(0,0,0,0.5); border: 2px dashed #ffaa00; border-radius: 10px; padding: 8px; margin-bottom: 12px; font-size: 0.85rem; color: #ffea00;
+        }
+
+        /* 5대 종목 메뉴 카드 */
+        .sports-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 12px;
+        }
+        .sports-card {
+            background: linear-gradient(135deg, #2563eb, #1e40af); border: 3px solid #60a5fa; border-radius: 12px;
+            padding: 14px; cursor: pointer; text-align: center; box-shadow: 0 4px 0 #1e3a8a;
+            transition: transform 0.1s;
+        }
+        .sports-card:active { transform: translateY(3px); box-shadow: 0 1px 0 #1e3a8a; }
+        .sports-card.special { grid-column: span 2; background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fde047; box-shadow: 0 4px 0 #b45309; }
+
+        /* 모달 (종목 미션 화면) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8);
+            display: flex; justify-content: center; align-items: center; z-index: 100; padding: 15px; display: none;
+        }
+        .modal-content {
+            background: #1a2c4e; border: 4px solid #ffaa00; border-radius: 16px; width: 100%; max-width: 400px;
+            padding: 20px; max-height: 85vh; overflow-y: auto; text-align: left; position: relative;
+        }
+        .close-modal {
+            position: absolute; top: 10px; right: 15px; background: none; border: none; color: #ff5c5c; font-size: 1.5rem; cursor: pointer;
+            font-family: 'Black Han Sans', sans-serif;
+        }
+
+        .mission-item {
+            background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 8px; padding: 10px; margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem;
+        }
+        .mission-btn {
+            background: #10b981; border: none; color: #fff; padding: 6px 12px; border-radius: 6px; cursor: pointer;
+            font-family: 'Black Han Sans', sans-serif; font-size: 0.8rem; box-shadow: 0 2px 0 #047857; flex-shrink: 0; margin-left: 6px;
+        }
+        .mission-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .dashboard-table { width: 100%; font-size: 0.8rem; border-collapse: collapse; margin-top: 10px; }
+        .dashboard-table th, .dashboard-table td { border: 1px solid #334155; padding: 6px; text-align: center; }
+        .dashboard-table th { background: #1e3a8a; color: #ffea00; }
+
+        .admin-panel {
+            margin-top: 15px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; border: 1px dashed #666;
+        }
+        .admin-btn {
+            font-size: 0.75rem; color: #fff; background: #334155; border: none; padding: 6px 10px;
+            border-radius: 4px; cursor: pointer; font-family: 'Black Han Sans', sans-serif; margin: 3px;
+        }
+        .admin-btn.danger { background: #dc2626; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- 1. 시작 화면 (팀 & 이름 선택) -->
+        <div id="setup-screen" class="arcade-box">
+            <div class="title-flash">🍁 253 가을운동회 🍁</div>
+            <div style="font-size:0.9rem; color:#ffea00; margin-bottom:10px;">참가할 팀을 선택해주세요!</div>
+            
+            <div class="team-select-container">
+                <button class="team-btn blue" onclick="selectTeam('청팀')">🔵 청 팀</button>
+                <button class="team-btn white" onclick="selectTeam('백팀')">⚪ 백 팀</button>
+            </div>
+
+            <div id="member-select-section" style="display:none;">
+                <div id="team-title-label" style="font-size:0.95rem; color:#00f0ff; margin: 10px 0 6px 0;"></div>
+                <div class="member-grid" id="member-grid-container"></div>
+            </div>
+
+            <button class="btn-main" id="start-sports-btn" style="width:100%; padding:12px; background:linear-gradient(135deg, #ff0077, #ffea00); border:none; border-radius:8px; color:#000; font-family:'Black Han Sans',sans-serif; font-size:1.1rem; cursor:pointer; margin-top:10px;" onclick="enterSports()" disabled>
+                운동회 입장하기!
+            </button>
+        </div>
+
+        <!-- 2. 메인 화면 (전광판, 점수판, 5대 종목) -->
+        <div id="main-screen" class="arcade-box" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; background:rgba(0,0,0,0.3); padding:8px; border-radius:8px;">
+                <span style="font-size:0.9rem;"><b id="my-info-badge" style="color:#ffea00;">--</b> 님 환영합니다!</span>
+                <button onclick="logout()" style="background:none; border:1px solid #ff5c5c; color:#ff5c5c; padding:2px 6px; border-radius:4px; font-size:0.75rem; cursor:pointer;">팀 변경</button>
+            </div>
+
+            <div class="title-flash" style="font-size:1.5rem;">🏆 253 가을운동회 대전 🏆</div>
+
+            <!-- 오늘의 목표 전광판 -->
+            <div class="goal-board" id="goal-board-div">
+                📌 오늘의 목표 [SOLD PCS GOAL]<br>
+                🧶 Knit: <span id="goal-knit">0</span> / 🧥 Outer: <span id="goal-outer">0</span>
+            </div>
+
+            <!-- 청팀 vs 백팀 실시간 점수판 -->
+            <div class="scoreboard-panel">
+                <div class="score-card blue">
+                    <div style="font-size:0.8rem; color:#60a5fa;">🔵 청팀 누적상금</div>
+                    <div id="score-blue" style="font-size:1.2rem; font-weight:bold; color:#fff;">0원</div>
+                </div>
+                <div class="score-card white">
+                    <div style="font-size:0.8rem; color:#cbd5e1;">⚪ 백팀 누적상금</div>
+                    <div id="score-white" style="font-size:1.2rem; font-weight:bold; color:#fff;">0원</div>
+                </div>
+            </div>
+
+            <div style="font-size:0.85rem; color:#ffaa00; margin-bottom:8px;">🏟️ 운동회 종목을 선택하세요!</div>
+
+            <!-- 5대 종목 메뉴 그리드 -->
+            <div class="sports-grid">
+                <div class="sports-card" onclick="openModal('relay')">
+                    <div style="font-size:1.5rem;">🏃‍♂️</div>
+                    <div style="font-size:1rem; margin-top:4px;">이어달리기</div>
+                    <div style="font-size:0.7rem; color:#93c5fd;">Customer Journey</div>
+                </div>
+                <div class="sports-card" onclick="openModal('dodgeball')">
+                    <div style="font-size:1.5rem;">🏐</div>
+                    <div style="font-size:1rem; margin-top:4px;">피구</div>
+                    <div style="font-size:0.7rem; color:#93c5fd;">응대 & 어프로치</div>
+                </div>
+                <div class="sports-card" onclick="openModal('fashion')">
+                    <div style="font-size:1.5rem;">✨</div>
+                    <div style="font-size:1rem; margin-top:4px;">패션 콘테스트</div>
+                    <div style="font-size:0.7rem; color:#93c5fd;">스타일링 & 공유</div>
+                </div>
+                <div class="sports-card" onclick="openModal('picnic')">
+                    <div style="font-size:1.5rem;">🧺</div>
+                    <div style="font-size:1rem; margin-top:4px;">피크닉</div>
+                    <div style="font-size:0.7rem; color:#93c5fd;">팀 케어 & 매장 액션</div>
+                </div>
+                <div class="sports-card special" onclick="openModal('piñata')">
+                    <div style="font-size:1.5rem;">🎊 박 터트리기 🎊</div>
+                    <div style="font-size:0.8rem; color:#fef08a; margin-top:2px;">목표 달성 보너스 이벤트 [MGR 전용] (+1,000원)</div>
+                </div>
+            </div>
+
+            <!-- 개인별 누적 랭킹 대시보드 -->
+            <div style="margin-top:15px; background:rgba(0,0,0,0.4); padding:10px; border-radius:10px; border:1px solid #ffaa00;">
+                <div style="font-size:0.85rem; color:#ffea00; margin-bottom:6px;">📊 운동회 개인별 누적 랭킹</div>
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>이름(팀)</th>
+                            <th>획득 상금</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dashboard-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- 관리자 패널 -->
+            <div class="admin-panel">
+                <div style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">🛠️ 관리자 전용 제어판 (비번: 253253)</div>
+                <button class="admin-btn" onclick="resetTeamScore('청팀')">🔵 청팀 상금 초기화</button>
+                <button class="admin-btn" onclick="resetTeamScore('백팀')">⚪ 백팀 상금 초기화</button>
+                <button class="admin-btn danger" onclick="adminResetAll()">전체 데이터 초기화</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 미션 상세 모달 창 -->
+    <div class="modal-overlay" id="mission-modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeModal()">✕</button>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+<script>
+    const FIREBASE_URL = "https://arcade-2ed34-default-rtdb.firebaseio.com/"; 
+
+    const teams = {
+        "청팀": ["윤정", "유진", "정환", "주은", "주하"],
+        "백팀": ["지인", "성경", "채령", "선우", "한솔"]
+    };
+
+    let selectedTeam = null;
+    let selectedMember = null;
+    let myName = localStorage.getItem('sports_253_user');
+    let myTeam = localStorage.getItem('sports_253_team');
+
+    function initSetup() {
+        if (myName && myTeam) {
+            selectedName = myName;
+            selectedTeam = myTeam;
+            startMainGame();
+        }
+    }
+
+    function selectTeam(teamName) {
+        selectedTeam = teamName;
+        document.querySelectorAll('.team-btn').forEach(b => b.style.opacity = '0.5');
+        event.currentTarget.style.opacity = '1';
+
+        document.getElementById('member-select-section').style.display = 'block';
+        document.getElementById('team-title-label').innerText = `👉 ${teamName} 팀원 중 본인 이름을 고르세요:`;
+        
+        const grid = document.getElementById('member-grid-container');
+        grid.innerHTML = "";
+        teams[teamName].forEach((name, idx) => {
+            grid.innerHTML += `
+                <div class="member-card" id="member-card-${idx}" onclick="selectMemberItem('${name}', ${idx})">
+                    <b>${name}</b>
+                </div>
+            `;
+        });
+    }
+
+    function selectMemberItem(name, idx) {
+        document.querySelectorAll('.member-grid .member-card').forEach(c => c.classList.remove('selected'));
+        document.getElementById(`member-card-${idx}`).classList.add('selected');
+        selectedMember = name;
+        document.getElementById('start-sports-btn').disabled = false;
+        document.getElementById('start-sports-btn').innerText = `[${selectedTeam} / ${selectedMember}] 운동회 입장하기!`;
+    }
+
+    function enterSports() {
+        if (!selectedTeam || !selectedMember) return;
+        myName = selectedMember;
+        myTeam = selectedTeam;
+        localStorage.setItem('sports_253_user', myName);
+        localStorage.setItem('sports_253_team', myTeam);
+
+        fetch(`${FIREBASE_URL}sports_253_users/${myName}.json`).then(res => res.json()).then(existing => {
+            const userData = {
+                name: myName,
+                team: myTeam,
+                total_won: existing && existing.total_won !== undefined ? Number(existing.total_won) : 0
+            };
+            fetch(`${FIREBASE_URL}sports_253_users/${myName}.json`, {
+                method: 'PUT',
+                body: JSON.stringify(userData)
+            }).then(() => startMainGame());
+        });
+    }
+
+    function logout() {
+        localStorage.removeItem('sports_253_user');
+        localStorage.removeItem('sports_253_team');
+        location.reload();
+    }
+
+    function startMainGame() {
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('main-screen').style.display = 'block';
+        document.getElementById('my-info-badge').innerText = `${myTeam} ${myName}`;
+
+        updateDailyGoals();
+        syncGameData();
+        setInterval(syncGameData, 3000);
+    }
+
+    function updateDailyGoals() {
+        const now = new Date();
+        const utcNow = now.getTime() + (now.getTimezoneOffset() * 60000); 
+        const koreaTimeDiff = 9 * 60 * 60 * 1000;
+        const koreaNow = new Date(utcNow + koreaTimeDiff);
+        const day = koreaNow.getDay(); 
+
+        let knitGoal = 20;
+        let outerGoal = 6;
+
+        if (day === 1 || day === 2) { 
+            knitGoal = 20; outerGoal = 6;
+        } else if (day === 3 || day === 4) { 
+            knitGoal = 22; outerGoal = 7;
+        } else if (day === 5) { 
+            knitGoal = 27; outerGoal = 8;
+        } else { 
+            knitGoal = 40; outerGoal = 10;
+        }
+
+        document.getElementById('goal-knit').innerText = knitGoal;
+        document.getElementById('goal-outer').innerText = outerGoal;
+    }
+
+    function syncGameData() {
+        fetch(`${FIREBASE_URL}sports_253_users.json`).then(res => res.json()).then(users => {
+            renderDashboard(users || {});
+        }).catch(err => console.log("Sync error:", err));
+    }
+
+    function renderDashboard(users) {
+        const tbody = document.getElementById('dashboard-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = "";
+
+        let blueTotal = 0;
+        let whiteTotal = 0;
+        const userList = Object.values(users).filter(u => u && u.name);
+
+        userList.forEach(u => {
+            if (u.team === '청팀') blueTotal += (u.total_won || 0);
+            if (u.team === '백팀') whiteTotal += (u.total_won || 0);
+        });
+
+        document.getElementById('score-blue').innerText = blueTotal.toLocaleString() + "원";
+        document.getElementById('score-white').innerText = whiteTotal.toLocaleString() + "원";
+
+        userList.sort((a, b) => (b.total_won || 0) - (a.total_won || 0));
+
+        userList.forEach(u => {
+            tbody.innerHTML += `
+                <tr style="${u.name === myName ? 'background:rgba(255,170,0,0.15); font-weight:bold;' : ''}">
+                    <td>${u.name} (${u.team})</td>
+                    <td>${(u.total_won || 0).toLocaleString()}원</td>
+                </tr>
+            `;
+        });
+    }
+
+    function openModal(type) {
+        const modal = document.getElementById('mission-modal');
+        const body = document.getElementById('modal-body');
+        modal.style.display = 'flex';
+
+        if (type === 'relay') {
+            body.innerHTML = `
+                <div class="title-flash" style="font-size:1.1rem;">🏃‍♂️ 이어달리기 (Customer Journey)</div>
+                <div style="font-size:0.75rem; color:#93c5fd; margin-bottom:10px;">6단계를 모두 체크하고 완료하면 <b>500원</b> 획득! (반복 가능)</div>
+                <div class="mission-item"><span>1단계: Welcome & Greeting</span> <input type="checkbox" class="relay-chk"></div>
+                <div class="mission-item"><span>2단계: Proactive Approach</span> <input type="checkbox" class="relay-chk"></div>
+                <div class="mission-item"><span>3단계: Asking Questions(4W)</span> <input type="checkbox" class="relay-chk"></div>
+                <div class="mission-item"><span>4단계: Knowledge Sharing</span> <input type="checkbox" class="relay-chk"></div>
+                <div class="mission-item"><span>5단계: Try-On and offer styling advice</span> <input type="checkbox" class="relay-chk"></div>
+                <div class="mission-item"><span>6단계: Recommend Additional Item</span> <input type="checkbox" class="relay-chk"></div>
+                <button class="mission-btn" style="width:100%; margin-top:10px; padding:10px; margin-left:0;" onclick="completeRelay()">전부 완료! 상금 받기 (+500원)</button>
+            `;
+        } else if (type === 'dodgeball') {
+            body.innerHTML = `
+                <div class="title-flash" style="font-size:1.2rem;">🏐 피구 (응대 & 어프로치)</div>
+                <div class="mission-item"><span>오픈 퀘스천 5회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '오픈 퀘스천 달성')">달성!</button></div>
+                <div class="mission-item"><span>Knit/Outer 제안 5회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '상품 제안 달성')">달성!</button></div>
+                <div class="mission-item"><span>Knit/Outer 판매 1회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '상품 판매 달성')">달성!</button></div>
+                <div class="mission-item"><span>고객님께 먼저 어프로치 10회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '어프로치 달성')">달성!</button></div>
+            `;
+        } else if (type === 'fashion') {
+            body.innerHTML = `
+                <div class="title-flash" style="font-size:1.2rem;">✨ 패션 콘테스트</div>
+                <div class="mission-item"><span>Knit/Outer 스타일링 직접 입고 사진 공유 (+500원)</span> <button class="mission-btn" onclick="addReward(500, '패션 콘테스트 참여')">공유 완료!</button></div>
+                <div class="mission-item"><span>Knit 또는 아우터 3I 공유하기 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '3I 공유 완료')">공유 완료!</button></div>
+            `;
+        } else if (type === 'picnic') {
+            body.innerHTML = `
+                <div class="title-flash" style="font-size:1.2rem;">🧺 피크닉</div>
+                <div class="mission-item"><span>팀원들 안위 살피기 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '팀원 케어 완료')">달성!</button></div>
+                <div class="mission-item"><span>그린피드백 수행 (+500원)</span> <button class="mission-btn" onclick="addReward(500, '그린피드백 완료')">달성!</button></div>
+                <div class="mission-item"><span>MGR팀 미니게임 이기기 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '미니게임 승리')">달성!</button></div>
+                <div class="mission-item"><span>오버뷰 보고 필요한 액션하기 (+500원)</span> <button class="mission-btn" onclick="addReward(500, '오버뷰 액션 완료')">달성!</button></div>
+            `;
+        } else if (type === 'piñata') {
+            body.innerHTML = `
+                <div class="title-flash" style="font-size:1.2rem;">🎊 박 터트리기 이벤트</div>
+                <div style="font-size:0.85rem; color:#ffea00; margin-bottom:12px; text-align:center;">
+                    🔒 <b>매니저 전용 기능</b><br>오늘의 Knit, Outer 목표 골(Goal) 달성 시 박을 터트려 <b>청팀과 백팀 모두에게 각각 +1,000원씩</b> 보너스 지급!
+                </div>
+                <div class="mission-item"><span>목표 달성 박 터트리기! (+1,000원)</span> <button class="mission-btn" style="background:#f59e0b;" onclick="burstPiñata()">박 터트리기! 🎊</button></div>
+            `;
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('mission-modal').style.display = 'none';
+    }
+
+    function completeRelay() {
+        const checkboxes = document.querySelectorAll('.relay-chk');
+        let allChecked = true;
+        checkboxes.forEach(chk => {
+            if (!chk.checked) allChecked = false;
+        });
+
+        if (!allChecked) {
+            alert("1단계부터 6단계까지 모두 체크해야 완료됩니다!");
+            return;
+        }
+
+        addReward(500, "이어달리기 6단계 완주 성공");
+        checkboxes.forEach(chk => chk.checked = false);
+    }
+
+    function addReward(amount, desc) {
+        fetch(`${FIREBASE_URL}sports_253_users/${myName}.json`).then(res => res.json()).then(user => {
+            user = user || { name: myName, team: myTeam, total_won: 0 };
+            user.total_won = (Number(user.total_won) || 0) + amount;
+
+            fetch(`${FIREBASE_URL}sports_253_users/${myName}.json`, {
+                method: 'PUT',
+                body: JSON.stringify(user)
+            }).then(() => {
+                alert(`🎉 [${desc}] 완료! 상금 +${amount}원 획득!`);
+                closeModal();
+                syncGameData();
+            });
+        });
+    }
+
+    // 매니저 전용 박 터트리기 (비밀번호 253253 인증 및 양팀 전체 +1,000원)
+    function burstPiñata() {
+        const pwd = prompt("매니저 비밀번호를 입력하세요:");
+        if (pwd === "253253") {
+            fetch(`${FIREBASE_URL}sports_253_users.json`).then(res => res.json()).then(users => {
+                if (!users) { alert("플레이어 정보가 없습니다."); return; }
+                const promises = [];
+                Object.values(users).forEach(u => {
+                    if (u && u.name) {
+                        u.total_won = (Number(u.total_won) || 0) + 1000;
+                        promises.push(
+                            fetch(`${FIREBASE_URL}sports_253_users/${u.name}.json`, {
+                                method: 'PUT',
+                                body: JSON.stringify(u)
+                            })
+                        );
+                    }
+                });
+
+                Promise.all(promises).then(() => {
+                    alert("🎊 콰직! 박이 터졌습니다!\n청팀과 백팀의 모든 팀원에게 보너스 +1,000원 지급 완료!");
+                    closeModal();
+                    syncGameData();
+                });
+            });
+        } else if (pwd !== null) {
+            alert("비밀번호가 올바르지 않습니다! 매니저만 수행할 수 있습니다.");
+        }
+    }
+
+    function resetTeamScore(targetTeam) {
+        const pwd = prompt(`관리자 비밀번호를 입력하세요 (${targetTeam} 초기화):`);
+        if (pwd === "253253") {
+            if (confirm(`정말로 ${targetTeam} 팀원들의 상금을 모두 초기화하시겠습니까?`)) {
+                fetch(`${FIREBASE_URL}sports_253_users.json`).then(res => res.json()).then(users => {
+                    if (!users) { alert("데이터가 없습니다."); return; }
+                    const promises = [];
+                    Object.values(users).forEach(u => {
+                        if (u && u.team === targetTeam) {
+                            u.total_won = 0;
+                            promises.push(
+                                fetch(`${FIREBASE_URL}sports_253_users/${u.name}.json`, {
+                                    method: 'PUT',
+                                    body: JSON.stringify(u)
+                                })
+                            );
+                        }
+                    });
+                    Promise.all(promises).then(() => {
+                        alert(`${targetTeam} 상금이 초기화되었습니다!`);
+                        syncGameData();
+                    });
+                });
+            }
+        } else if (pwd !== null) {
+            alert("비밀번호가 틀렸습니다!");
+        }
+    }
+
+    function adminResetAll() {
+        const pwd = prompt("전체 데이터 초기화 관리자 비밀번호를 입력하세요:");
+        if (pwd === "253253") {
+            if (confirm("정말로 모든 가을운동회 데이터를 완전히 초기화하시겠습니까?")) {
+                fetch(`${FIREBASE_URL}sports_253_users.json`, { method: 'DELETE' }).then(() => {
+                    alert("전체 데이터가 초기화되었습니다!");
+                    localStorage.removeItem('sports_253_user');
+                    localStorage.removeItem('sports_253_team');
+                    location.reload();
+                });
+            }
+        } else if (pwd !== null) {
+            alert("비밀번호가 틀렸습니다!");
+        }
+    }
+
+    window.onload = initSetup;
+</script>
+</body>
+</html>
