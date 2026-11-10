@@ -210,7 +210,7 @@
                 </table>
             </div>
 
-            <!-- 관리자 패널 (비밀번호 노출 문구 제거됨) -->
+            <!-- 관리자 패널 -->
             <div class="admin-panel">
                 <div style="font-size:0.75rem; color:#aaa; margin-bottom:6px;">🛠️ 관리자 전용 제어판</div>
                 <button class="admin-btn" onclick="resetTeamScore('청팀')">🔵 청팀 상금 초기화</button>
@@ -396,6 +396,8 @@
                 <div class="mission-item"><span>Knit/Outer 제안 5회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '상품 제안 달성')">달성!</button></div>
                 <div class="mission-item"><span>Knit/Outer 판매 1회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '상품 판매 달성')">달성!</button></div>
                 <div class="mission-item"><span>고객님께 먼저 어프로치 10회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '어프로치 달성')">달성!</button></div>
+                <div class="mission-item"><span>아우터 알고리즘 시도 3회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '아우터 알고리즘 시도 달성')">달성!</button></div>
+                <div class="mission-item"><span>GWP 언급 5회 (+100원)</span> <button class="mission-btn" onclick="addReward(100, 'GWP 언급 달성')">달성!</button></div>
             `;
         } else if (type === 'fashion') {
             body.innerHTML = `
@@ -410,6 +412,7 @@
                 <div class="mission-item"><span>그린피드백 수행 (+500원)</span> <button class="mission-btn" onclick="addReward(500, '그린피드백 완료')">달성!</button></div>
                 <div class="mission-item"><span>MGR팀 미니게임 이기기 (+100원)</span> <button class="mission-btn" onclick="addReward(100, '미니게임 승리')">달성!</button></div>
                 <div class="mission-item"><span>오버뷰 보고 필요한 액션하기 (+500원)</span> <button class="mission-btn" onclick="addReward(500, '오버뷰 액션 완료')">달성!</button></div>
+                <div class="mission-item"><span>Thanks moment 작성 (+500원)</span> <button class="mission-btn" onclick="addReward(500, 'Thanks moment 작성 완료')">달성!</button></div>
             `;
         } else if (type === 'piñata') {
             body.innerHTML = `
